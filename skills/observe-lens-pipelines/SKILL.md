@@ -6,7 +6,7 @@ compatibility: >-
   Python 3.11+ (standard library only) on macOS, Linux or Windows, network access to the CI server, and an instance in ~/.config/observe-lens/pipelines (see references/setup.md).
 license: Apache-2.0
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # observe-lens: pipelines

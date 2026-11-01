@@ -545,8 +545,11 @@ class TestPluginManifests(EnvGuard):
     def test_validate_plugins_clean(self):
         vs = helpers.load_module(
             "validate_skills_mod", "tools/validate_skills.py")
-        problems = []
-        vs.validate_plugins(problems, {"1.0.0"})
+        problems, versions = [], set()
+        for skill_dir in sorted(p for p in vs.SKILLS.iterdir() if p.is_dir()):
+            vs._validate_skill(skill_dir, problems, versions)
+        assert len(versions) == 1
+        vs.validate_plugins(problems, versions)
         assert problems == []
 
     def test_validate_plugins_catches_drift(self):

@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-01
+
+### Added
+
+- Project logo, used in the README and the Codex and Cursor plugin cards.
+
+### Fixed
+
+- Codex and Cursor installs: add the `.codex-plugin/plugin.json` and
+  `.cursor-plugin/plugin.json` manifests those tools require.
+- `config init` in a development checkout copies `config.example.json` again.
+
 ## [1.0.0] - 2026-10-31
 
 ### Added
@@ -24,5 +36,6 @@ All notable changes to this project are documented here. The format follows
   limits.
 - Plugin manifests for Devin, Claude Code, Codex and Cursor.
 
-[Unreleased]: https://github.com/evrentan/observe-lens/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/evrentan/observe-lens/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/evrentan/observe-lens/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/evrentan/observe-lens/releases/tag/v1.0.0

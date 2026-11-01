@@ -6,7 +6,7 @@ compatibility: >-
   Python 3.11+ (standard library only) on macOS, Linux or Windows. Argo CD needs network access and an instance in ~/.config/observe-lens/cd; kubectl, helm or flux need those CLIs and a kube context (see references/setup.md).
 license: Apache-2.0
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # observe-lens: CD
