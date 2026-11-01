@@ -16,9 +16,14 @@ PLUGIN_FILES = [
     ROOT / "plugin.json",
     ROOT / ".claude-plugin" / "plugin.json",
     ROOT / ".claude-plugin" / "marketplace.json",
+    ROOT / ".cursor-plugin" / "plugin.json",
     ROOT / ".cursor-plugin" / "marketplace.json",
+    ROOT / ".codex-plugin" / "plugin.json",
     ROOT / ".agents" / "plugins" / "marketplace.json",
 ]
+VERSIONED_MANIFESTS = [".claude-plugin/plugin.json",
+                       ".cursor-plugin/plugin.json",
+                       ".codex-plugin/plugin.json"]
 PLUGIN_TOP_KEYS = {"$schema", "name", "version", "description", "author",
                    "homepage", "repository", "license", "keywords",
                    "extensions"}
@@ -75,8 +80,8 @@ def _plugin_versions_ok(parsed, skill_versions, problems):
     versions = []
     root = parsed.get(ROOT / "plugin.json") or {}
     versions.append(("plugin.json", root.get("version")))
-    claude = parsed.get(ROOT / ".claude-plugin" / "plugin.json") or {}
-    versions.append((".claude-plugin/plugin.json", claude.get("version")))
+    for rel in VERSIONED_MANIFESTS:
+        versions.append((rel, (parsed.get(ROOT / rel) or {}).get("version")))
     cursor = parsed.get(ROOT / ".cursor-plugin" / "marketplace.json") or {}
     versions.append((".cursor-plugin metadata",
                      (cursor.get("metadata") or {}).get("version")))

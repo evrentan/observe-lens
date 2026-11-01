@@ -1,0 +1,40 @@
+{
+  "name": "observe-lens",
+  "version": "1.0.0",
+  "description": "Read-only investigation skills across CI pipelines (Jenkins, GitHub Actions), CD (Argo CD, Flux, Helm, Kubernetes), databases (PostgreSQL, MySQL, MongoDB) and telemetry (Grafana, Loki, Tempo, Prometheus).",
+  "author": {
+    "name": "Evren Tan",
+    "url": "https://github.com/evrentan"
+  },
+  "homepage": "https://github.com/evrentan/observe-lens",
+  "repository": "https://github.com/evrentan/observe-lens",
+  "license": "Apache-2.0",
+  "keywords": [
+    "observability",
+    "debugging",
+    "ci",
+    "cd",
+    "database",
+    "grafana",
+    "skills"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "observe-lens",
+    "shortDescription": "Explain what happened across CI, CD, databases and telemetry",
+    "longDescription": "Read-only investigation of Jenkins and GitHub Actions runs, Argo CD, Flux, Helm and Kubernetes deployments, PostgreSQL, MySQL and MongoDB data, and Grafana, Loki, Tempo and Prometheus telemetry, with a router skill that correlates findings across them.",
+    "developerName": "Evren Tan",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "websiteURL": "https://github.com/evrentan/observe-lens",
+    "brandColor": "#0EA5E9",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.png",
+    "defaultPrompt": [
+      "Why did the last CI run fail, and did it deploy?"
+    ]
+  }
+}

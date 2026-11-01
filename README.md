@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="observe-lens logo" width="128" height="128">
+</p>
+
 # observe-lens
 
 [![ci](https://github.com/evrentan/observe-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/evrentan/observe-lens/actions/workflows/ci.yml)
