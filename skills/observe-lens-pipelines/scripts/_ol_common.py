@@ -1069,10 +1069,8 @@ def _assets_dir(area):
     """The skill's assets/ dir. Works when this file lives in
     scripts/_ol_common.py (deployed) and at repo common/ (development)."""
     here = Path(__file__).resolve().parent.parent
-    d = here / "assets"
-    if d.exists():
-        return d
-    return here / "skills" / ("observe-lens-%s" % area) / "assets"
+    dev = here / "skills" / ("observe-lens-%s" % area) / "assets"
+    return dev if dev.exists() else here / "assets"
 
 
 def _ensure_secrets_dir(area):
