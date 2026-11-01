@@ -1,0 +1,14 @@
+{
+  "name": "observe-lens",
+  "owner": {
+    "name": "Evren Tan",
+    "url": "https://github.com/evrentan"
+  },
+  "plugins": [
+    {
+      "name": "observe-lens",
+      "source": "./",
+      "description": "Read-only investigation skills across CI pipelines (Jenkins, GitHub Actions), CD (Argo CD, Flux, Helm, Kubernetes), databases (PostgreSQL, MySQL, MongoDB) and telemetry (Grafana, Loki, Tempo, Prometheus)."
+    }
+  ]
+}

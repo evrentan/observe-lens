@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "observe-lens",
+  "version": "1.0.0",
+  "description": "Read-only investigation skills across CI pipelines (Jenkins, GitHub Actions), CD (Argo CD, Flux, Helm, Kubernetes), databases (PostgreSQL, MySQL, MongoDB) and telemetry (Grafana, Loki, Tempo, Prometheus).",
+  "author": {
+    "name": "Evren Tan",
+    "url": "https://github.com/evrentan"
+  },
+  "homepage": "https://github.com/evrentan/observe-lens",
+  "repository": "https://github.com/evrentan/observe-lens",
+  "license": "Apache-2.0",
+  "keywords": [
+    "observability",
+    "debugging",
+    "ci",
+    "cd",
+    "database",
+    "grafana",
+    "skills"
+  ]
+}

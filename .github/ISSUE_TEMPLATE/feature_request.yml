@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest a new provider, check or improvement.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        observe-lens stays read-only: requests that would make scripts
+        change state (deploy, restart, write data) are out of scope.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Skill
+      options:
+        - observe-lens (router)
+        - observe-lens-pipelines
+        - observe-lens-cd
+        - observe-lens-db
+        - observe-lens-telemetry
+        - Setup / config
+        - New area
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to find out or investigate, and what is missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: For a new provider, name the read-only API endpoints or CLI commands it would use.
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to open a pull request for this

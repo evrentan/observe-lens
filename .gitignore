@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv*/
+venv/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.complexipy_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Secrets and credentials (never commit)
+secrets/
+*.token
+*.netrc
+_netrc
+.env*
+*.pem
+*.key
+*.p12
+*.pfx
+*.kubeconfig
+
+# skill-generator eval workspaces
+*-workspace/
+
+# Personal agent settings
+.claude/settings.local.json
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

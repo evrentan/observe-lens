@@ -1,0 +1,62 @@
+name: Bug report
+description: Something in observe-lens does not work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Redact before you paste:** remove tokens,
+        passwords, hostnames, IPs, customer data and company names from
+        commands, config and output. Security vulnerabilities go to
+        [private reporting](https://github.com/evrentan/observe-lens/security/advisories/new) instead.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Skill
+      options:
+        - observe-lens (router)
+        - observe-lens-pipelines
+        - observe-lens-cd
+        - observe-lens-db
+        - observe-lens-telemetry
+        - Setup / config
+        - Plugin install
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you asked or ran, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Script command or agent prompt, and the relevant (redacted) config.
+      render: shell
+  - type: textarea
+    id: output
+    attributes:
+      label: Output or error (redacted)
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: observe-lens version
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: Agent tool and version
+      placeholder: "Devin, Claude Code, Codex, Cursor, ..."
+  - type: input
+    id: environment
+    attributes:
+      label: OS and Python version
+      placeholder: "macOS 15, Python 3.13"
+    validations:
+      required: true

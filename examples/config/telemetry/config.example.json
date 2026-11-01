@@ -1,0 +1,23 @@
+{
+  "default": "grafana-prod",
+  "instances": {
+    "grafana-prod": {
+      "provider": "grafana",
+      "url": "https://grafana.example.com",
+      "environment": "prod",
+      "org_id": 1,
+      "datasources": {
+        "logs": "<loki-datasource-uid>",
+        "metrics": "<prometheus-datasource-uid>",
+        "traces": "<tempo-datasource-uid>"
+      },
+      "timeout": 60
+    },
+    "loki-direct": {
+      "provider": "loki",
+      "url": "https://loki.example.com",
+      "tenant": "shop",
+      "environment": "prod"
+    }
+  }
+}

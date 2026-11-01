@@ -1,0 +1,19 @@
+{
+  "default": "argocd-prod",
+  "instances": {
+    "argocd-prod": {
+      "provider": "argocd",
+      "url": "https://argocd.example.com",
+      "environment": "prod",
+      "description": "production Argo CD",
+      "timeout": 60
+    },
+    "cluster-dev": {
+      "provider": "kubernetes",
+      "context": "dev-cluster",
+      "namespace": "shop",
+      "environment": "dev",
+      "description": "dev cluster context for kube_ro.py"
+    }
+  }
+}

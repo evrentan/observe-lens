@@ -1,0 +1,20 @@
+{
+  "name": "observe-lens",
+  "owner": {
+    "name": "Evren Tan"
+  },
+  "metadata": {
+    "description": "Read-only investigation skills across CI pipelines (Jenkins, GitHub Actions), CD (Argo CD, Flux, Helm, Kubernetes), databases (PostgreSQL, MySQL, MongoDB) and telemetry (Grafana, Loki, Tempo, Prometheus).",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "observe-lens",
+      "source": ".",
+      "description": "Read-only investigation skills across CI pipelines (Jenkins, GitHub Actions), CD (Argo CD, Flux, Helm, Kubernetes), databases (PostgreSQL, MySQL, MongoDB) and telemetry (Grafana, Loki, Tempo, Prometheus).",
+      "version": "1.0.0",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/evrentan/observe-lens"
+    }
+  ]
+}

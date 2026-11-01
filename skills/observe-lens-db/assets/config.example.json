@@ -1,0 +1,48 @@
+{
+  "default": "shop-dev",
+  "tunnels": {
+    "dev-bastion": {
+      "ssh_host": "bastion-dev",
+      "identity_file": "~/.ssh/id_ed25519",
+      "port": 22,
+      "forwards": [
+        {"local_port": 15432, "remote_host": "db.internal", "remote_port": 5432}
+      ],
+      "ssh_args": []
+    }
+  },
+  "instances": {
+    "shop-dev": {
+      "engine": "postgres",
+      "host": "127.0.0.1",
+      "port": 15432,
+      "database": "shop",
+      "user": "shop_ro",
+      "users": ["shop_ro"],
+      "tunnel": "dev-bastion",
+      "environment": "dev",
+      "sslmode": "prefer"
+    },
+    "orders-mysql": {
+      "engine": "mysql",
+      "host": "mysql.internal",
+      "port": 3306,
+      "database": "orders",
+      "user": "orders_ro",
+      "users": ["orders_ro"],
+      "environment": "dev"
+    },
+    "catalog-mongo": {
+      "engine": "mongodb",
+      "host": "mongo.internal",
+      "port": 27017,
+      "database": "catalog",
+      "user": "catalog_ro",
+      "users": ["catalog_ro"],
+      "auth_source": "admin",
+      "tls": true,
+      "options": {},
+      "environment": "dev"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "default": "ci-main",
+  "instances": {
+    "ci-main": {
+      "provider": "jenkins",
+      "url": "https://jenkins.example.com",
+      "environment": "prod",
+      "description": "main Jenkins controller",
+      "timeout": 60
+    },
+    "github-main": {
+      "provider": "github",
+      "url": "https://api.github.com",
+      "web_url": "https://github.com",
+      "repo": "acme/shop",
+      "environment": "prod",
+      "description": "GitHub Actions for the shop repo"
+    }
+  }
+}
