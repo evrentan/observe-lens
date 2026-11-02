@@ -185,9 +185,11 @@ built to be safe by default. The scripts are a second layer of protection;
 - **Leaked secrets are masked.** Tokens, keys, JWTs and password values found
   in logs, test reports, database rows and cluster output are replaced with
   `[REDACTED:<kind>]` before the agent sees them.
-- **Production asks first.** Instances whose environment is
-  `prod`/`production`/`prd`/`live` ask once per session before the first read.
-  Set `"confirm": true` or `false` on an instance to override this.
+- **Production needs `--prod`.** Scripts refuse instances whose environment
+  is `prod`/`production`/`prd`/`live` unless the command includes `--prod`,
+  which the agent adds only after you say yes (once per session). The flag
+  never relaxes the read-only guards. Set `"confirm": true` or `false` on an
+  instance to override the environment.
 - **Bounded queries.** Default row and line limits apply, and log or trace
   windows longer than 24 hours need an explicit `--wide`.
 - **Private temp files.** Downloaded logs and artifacts go to a per-user

@@ -139,10 +139,16 @@ def warn_http_creds(area, name, inst):
             return
 
 
-def note_if_prod(name, inst):
-    if needs_confirm(inst):
-        print("note: instance '%s' is production (confirm=yes)" % name,
-              file=sys.stderr)
+def require_prod_flag(name, inst, args):
+    """Refuse production instances unless --prod was given. --prod only
+    allows the run; every read-only guard still applies."""
+    if not needs_confirm(inst):
+        return
+    if not getattr(args, "prod", False):
+        raise OlError("refused: instance '%s' is production; ask the user, "
+                      "then re-run with --prod" % name, EX_GUARD)
+    print("note: instance '%s' is production (--prod given; read-only "
+          "guards still apply)" % name, file=sys.stderr)
 
 
 def normalize_api_path(path):

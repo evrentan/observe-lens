@@ -5,6 +5,7 @@ from __future__ import annotations
 import http.server
 import json
 import os
+import pytest
 import subprocess
 import sys
 import tempfile
@@ -17,6 +18,7 @@ SCRIPTS = ROOT / "skills"
 
 # recorded request headers (Authorization on redirect must NOT leak)
 SEEN_AUTH_ON_BLOB = []
+REQUEST_COUNT = [0]
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
@@ -49,6 +51,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         return True
 
     def do_GET(self):
+        REQUEST_COUNT[0] += 1
         p = urllib.parse.urlsplit(self.path).path
         r = (self._jenkins(p) or self._github(p) or self._argo(p)
              or self._grafana(p))
@@ -356,3 +359,216 @@ class TestConfigListNoSecrets(SmokeBase):
         assert "SUPERSECRET123" not in r.stdout
         assert "SUPERSECRET123" not in r.stderr
         assert "file" in r.stdout
+
+
+class TestProdFlag(SmokeBase):
+    """Every area script must refuse prod instances without --prod, before
+    any network/client call."""
+
+    def _cfg_prod(self, area, inst):
+        d = Path(self.cfg.name) / area
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "config.json").write_text(json.dumps(
+            {"default": "p", "instances": {"p": inst}}))
+
+    def _run(self, script, *argv, env=None):
+        return self.run_script(script, *argv, env=env)
+
+    def test_pipelines_refuses_without_flag(self):
+        base = "http://127.0.0.1:%d" % self.port
+        self._cfg_prod("pipelines",
+                       {"provider": "jenkins", "url": base,
+                        "environment": "prod"})
+        n0 = REQUEST_COUNT[0]
+        r = self._run("observe-lens-pipelines/scripts/pipelines.py",
+                      "--instance", "p", "whoami",
+                      env={"OBSERVE_LENS_PIPELINES_P_USERNAME": "u",
+                           "OBSERVE_LENS_PIPELINES_P_TOKEN": "t"})
+        assert r.returncode == 5
+        assert "--prod" in r.stderr
+        assert REQUEST_COUNT[0] == n0  # no request reached the server
+        r = self._run("observe-lens-pipelines/scripts/pipelines.py",
+                      "--instance", "p", "--prod", "whoami",
+                      env={"OBSERVE_LENS_PIPELINES_P_USERNAME": "u",
+                           "OBSERVE_LENS_PIPELINES_P_TOKEN": "t"})
+        assert r.returncode == 0
+        assert "ci-user" in r.stdout
+
+    def test_pipelines_nonprod_ok_without_flag(self):
+        base = "http://127.0.0.1:%d" % self.port
+        self._cfg_prod("pipelines",
+                       {"provider": "jenkins", "url": base})
+        r = self._run("observe-lens-pipelines/scripts/pipelines.py",
+                      "--instance", "p", "whoami",
+                      env={"OBSERVE_LENS_PIPELINES_P_USERNAME": "u",
+                           "OBSERVE_LENS_PIPELINES_P_TOKEN": "t"})
+        assert r.returncode == 0
+
+    def test_cd_refuses_without_flag(self):
+        base = "http://127.0.0.1:%d" % self.port
+        self._cfg_prod("cd", {"provider": "argocd", "url": base,
+                              "environment": "prod"})
+        n0 = REQUEST_COUNT[0]
+        r = self._run("observe-lens-cd/scripts/cd.py",
+                      "--instance", "p", "whoami",
+                      env={"OBSERVE_LENS_CD_P_TOKEN": "t"})
+        assert r.returncode == 5
+        assert "--prod" in r.stderr
+        assert REQUEST_COUNT[0] == n0
+        r = self._run("observe-lens-cd/scripts/cd.py",
+                      "--instance", "p", "--prod", "whoami",
+                      env={"OBSERVE_LENS_CD_P_TOKEN": "t"})
+        assert r.returncode == 0
+        assert "investigator" in r.stdout
+
+    def test_telemetry_refuses_without_flag(self):
+        base = "http://127.0.0.1:%d" % self.port
+        self._cfg_prod("telemetry",
+                       {"provider": "grafana", "url": base,
+                        "environment": "prod"})
+        n0 = REQUEST_COUNT[0]
+        r = self._run("observe-lens-telemetry/scripts/telemetry.py",
+                      "--instance", "p", "whoami",
+                      env={"OBSERVE_LENS_TELEMETRY_P_TOKEN": "t"})
+        assert r.returncode == 5
+        assert "--prod" in r.stderr
+        assert REQUEST_COUNT[0] == n0
+        r = self._run("observe-lens-telemetry/scripts/telemetry.py",
+                      "--instance", "p", "--prod", "whoami",
+                      env={"OBSERVE_LENS_TELEMETRY_P_TOKEN": "t"})
+        assert r.returncode == 0
+
+    def test_config_subcommands_unaffected(self):
+        base = "http://127.0.0.1:%d" % self.port
+        self._cfg_prod("pipelines",
+                       {"provider": "jenkins", "url": base,
+                        "environment": "prod"})
+        r = self._run("observe-lens-pipelines/scripts/pipelines.py",
+                      "config", "list")
+        assert r.returncode == 0
+        r = self._run("observe-lens-pipelines/scripts/pipelines.py",
+                      "config", "check", "--instance", "p")
+        # check runs (missing secrets -> rc 2 is fine); no --prod refusal
+        assert r.returncode != 5
+        assert "is production" not in r.stderr
+
+    def _fake_psql(self, tmp_path, body):
+        fake = tmp_path / "bin"
+        fake.mkdir()
+        marker = tmp_path / "psql-called"
+        if "%s" in body:
+            body = body % marker
+        (fake / "psql").write_text("#!/bin/sh\n" + body)
+        (fake / "psql").chmod(0o755)
+        env = dict(os.environ)
+        env["PATH"] = os.pathsep.join([str(fake), env.get("PATH", "")])
+        env["OBSERVE_LENS_CONFIG_DIR"] = self.cfg.name
+        return env, marker
+
+    def test_db_refuses_without_flag(self):
+        # refusal happens before any client lookup; no fake needed
+        self._cfg_prod("db", {"engine": "postgres", "host": "x",
+                              "database": "d", "user": "u",
+                              "environment": "prod"})
+        r = subprocess.run(
+            [sys.executable, str(SCRIPTS / "observe-lens-db/scripts/db.py"),
+             "--instance", "p", "ping"],
+            capture_output=True, text=True,
+            env=dict(os.environ, OBSERVE_LENS_CONFIG_DIR=self.cfg.name),
+            timeout=60)
+        assert r.returncode == 5
+        assert "--prod" in r.stderr
+        # --prod permits the run but never relaxes the SQL guard
+        r = subprocess.run(
+            [sys.executable, str(SCRIPTS / "observe-lens-db/scripts/db.py"),
+             "--instance", "p", "--prod", "query", "delete from t"],
+            capture_output=True, text=True,
+            env=dict(os.environ, OBSERVE_LENS_CONFIG_DIR=self.cfg.name),
+            timeout=60)
+        assert r.returncode == 5
+        assert "refused" in r.stderr
+
+    @pytest.mark.skipif(sys.platform == "win32",
+                        reason="POSIX shell fake client")
+    def test_db_prod_read_with_flag(self, tmp_path):
+        env, marker = self._fake_psql(
+            tmp_path, "echo called >> %s\necho OK\n")
+        self._cfg_prod("db", {"engine": "postgres", "host": "x",
+                              "database": "d", "user": "u",
+                              "environment": "prod"})
+        # without --prod the client is never invoked
+        r = subprocess.run(
+            [sys.executable, str(SCRIPTS / "observe-lens-db/scripts/db.py"),
+             "--instance", "p", "ping"],
+            capture_output=True, text=True, env=env, timeout=60)
+        assert r.returncode == 5
+        assert not marker.exists()
+        # read on prod with --prod works through the fake client
+        r = subprocess.run(
+            [sys.executable, str(SCRIPTS / "observe-lens-db/scripts/db.py"),
+             "--instance", "p", "--prod", "query", "select 1"],
+            capture_output=True, text=True, env=env, timeout=60)
+        assert r.returncode == 0
+        assert marker.exists()
+
+    @pytest.mark.skipif(sys.platform == "win32",
+                        reason="POSIX shell fake client")
+    def test_db_columns_exits_zero(self, tmp_path):
+        env, _ = self._fake_psql(tmp_path, "echo col1\n")
+        self._cfg_prod("db", {"engine": "postgres", "host": "x",
+                              "database": "d", "user": "u"})
+        r = subprocess.run(
+            [sys.executable, str(SCRIPTS / "observe-lens-db/scripts/db.py"),
+             "--instance", "p", "columns", "users"],
+            capture_output=True, text=True, env=env, timeout=60)
+        assert r.returncode == 0
+
+    def _no_cli_env(self, tmp_path):
+        """PATH with nothing on it: kube_ro dies EX_CONFIG before exec."""
+        empty = tmp_path / "empty-bin"
+        empty.mkdir()
+        return dict(os.environ, PATH=str(empty),
+                    OBSERVE_LENS_CONFIG_DIR=self.cfg.name)
+
+    def test_kube_ro_refuses_prod_without_flag(self, tmp_path):
+        self._cfg_prod("cd", {"provider": "kubernetes",
+                              "environment": "prod"})
+        r = self._run("observe-lens-cd/scripts/kube_ro.py",
+                      "--instance", "p", "kubectl", "get", "pods")
+        assert r.returncode == 5
+        assert "--prod" in r.stderr
+        # --prod permits the run but never relaxes decide()
+        r = self._run("observe-lens-cd/scripts/kube_ro.py",
+                      "--instance", "p", "--prod", "kubectl",
+                      "delete", "pod", "x")
+        assert r.returncode == 5
+        assert "refused" in (r.stderr + r.stdout)
+        # no --instance: unchanged behaviour (no config instance, no check).
+        # PATH has no kubectl -> script exits fast, never runs a real CLI.
+        r = subprocess.run(
+            [sys.executable,
+             str(SCRIPTS / "observe-lens-cd/scripts/kube_ro.py"),
+             "kubectl", "get", "pods"],
+            capture_output=True, text=True, timeout=60,
+            env=self._no_cli_env(tmp_path))
+        assert "is production; ask the user" not in r.stderr
+
+    def test_kube_ro_prod_flag_after_tool(self, tmp_path):
+        self._cfg_prod("cd", {"provider": "kubernetes",
+                              "environment": "prod"})
+        env = self._no_cli_env(tmp_path)
+        script = str(SCRIPTS / "observe-lens-cd/scripts/kube_ro.py")
+        # --prod after the tool name is pulled out of REMAINDER args:
+        # the prod refusal is not raised (kubectl itself may be absent)
+        r = subprocess.run([sys.executable, script, "--instance", "p",
+                            "kubectl", "get", "pods", "--prod"],
+                           capture_output=True, text=True, timeout=60,
+                           env=env)
+        assert "is production; ask the user" not in r.stderr
+        # and it never relaxes decide(): write still refused
+        r = subprocess.run([sys.executable, script, "--instance", "p",
+                            "kubectl", "delete", "pod", "x", "--prod"],
+                           capture_output=True, text=True, timeout=60,
+                           env=env)
+        assert r.returncode == 5
+        assert "refused" in (r.stderr + r.stdout)

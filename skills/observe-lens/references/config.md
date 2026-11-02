@@ -60,8 +60,9 @@ forwards.
 **Production marker.** An instance counts as production when
 `environment` is `prod`, `production`, `prd` or `live`, or when
 `"confirm": true` is set (`"confirm": false` overrides the environment
-default). The scripts print a `note:` line on stderr when they run
-against one, `config list` shows `confirm=yes|no`, and `config check`
+default). The scripts **refuse** such instances unless the command includes
+`--prod` (exit 5; `--prod` never relaxes any read-only guard and never
+allows writes). `config list` shows `confirm=yes|no`, and `config check`
 warns about instances that merely *look* like production without either
 field set.
 
