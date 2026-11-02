@@ -6,7 +6,7 @@ compatibility: >-
   Python 3.11+ (standard library only) on macOS, Linux or Windows. Each area needs its own config under ~/.config/observe-lens (see references/config.md).
 license: Apache-2.0
 metadata:
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # observe-lens

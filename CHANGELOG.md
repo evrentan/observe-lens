@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-02
+
 ### Changed
 
 - **Breaking:** scripts refuse production instances (environment `prod`,
@@ -48,6 +50,7 @@ All notable changes to this project are documented here. The format follows
   limits.
 - Plugin manifests for Devin, Claude Code, Codex and Cursor.
 
-[Unreleased]: https://github.com/evrentan/observe-lens/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/evrentan/observe-lens/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/evrentan/observe-lens/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/evrentan/observe-lens/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/evrentan/observe-lens/releases/tag/v1.0.0
