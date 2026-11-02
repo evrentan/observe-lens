@@ -627,6 +627,10 @@ def build_parser():
                     default=argparse.SUPPRESS)
     gp.add_argument("--json", action="store_true", default=argparse.SUPPRESS)
     gp.add_argument("--timeout", type=int, default=argparse.SUPPRESS)
+    gp.add_argument("--prod", action="store_true",
+                    default=argparse.SUPPRESS,
+                    help="required for production instances (reads only; "
+                         "guards still apply)")
     ap = argparse.ArgumentParser(prog="pipelines.py", parents=[gp],
                                  description="read-only CI client")
     sub = ap.add_subparsers(dest="cmd")
@@ -676,7 +680,7 @@ if __name__ == "__main__":
     try:
         cfg = ol.load_config(AREA)
         name, inst = ol.pick_instance(AREA, cfg, getattr(args, "instance", None))
-        ol.note_if_prod(name, inst)
+        ol.require_prod_flag(name, inst, args)
         ol.warn_http_creds(AREA, name, inst)
         prov = (inst.get("provider") or "").lower()
         timeout = getattr(args, "timeout", None) or inst.get("timeout") or 60

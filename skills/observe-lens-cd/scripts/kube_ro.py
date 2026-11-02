@@ -274,22 +274,36 @@ def _inject_instance_args(tool, inst, args):
     return out
 
 
+def _take_prod_flag(ns, args):
+    """Pull a --prod given after the tool name out of REMAINDER args so it
+    never reaches the CLI."""
+    if "--prod" in args:
+        ns.prod = True
+        args = [a for a in args if a != "--prod"]
+    return args
+
+
 def main():
     ap = argparse.ArgumentParser(
         prog="kube_ro.py",
         description="guarded read-only kubectl/helm/flux")
     ap.add_argument("--instance")
     ap.add_argument("--ro-timeout", type=int, default=60)
+    ap.add_argument("--prod", action="store_true",
+                    help="required for production instances (reads only; "
+                         "guards still apply)")
     ap.add_argument("tool", choices=["kubectl", "helm", "flux"])
     ap.add_argument("args", nargs=argparse.REMAINDER)
     ns = ap.parse_args()
     args = ns.args
     if args and args[0] == "--":
         args = args[1:]
+    args = _take_prod_flag(ns, args)
     inst = None
     if ns.instance:
         cfg = ol.load_config(AREA)
-        _, inst = ol.pick_instance(AREA, cfg, ns.instance)
+        name, inst = ol.pick_instance(AREA, cfg, ns.instance)
+        ol.require_prod_flag(name, inst, ns)
     ok, reason = decide(ns.tool, args)
     if not ok:
         ol.die("refused: %s" % reason, ol.EX_GUARD)

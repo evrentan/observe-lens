@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** scripts refuse production instances (environment `prod`,
+  `production`, `prd` or `live`, or `"confirm": true`) unless the command
+  includes `--prod`. The flag only allows the run; every read-only guard
+  still applies. ([#1](https://github.com/evrentan/observe-lens/issues/1))
+
+### Fixed
+
+- `db.py columns` on PostgreSQL and MySQL no longer exits with an
+  "unknown subcommand" error after printing the columns.
+
 ## [1.0.1] - 2026-11-01
 
 ### Added

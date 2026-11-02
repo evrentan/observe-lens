@@ -275,6 +275,10 @@ def _print_sql(area, name, inst, engine, stmt, user, fmt):
 def build_parser():
     gp = argparse.ArgumentParser(add_help=False)
     gp.add_argument("--instance", default=argparse.SUPPRESS)
+    gp.add_argument("--prod", action="store_true",
+                    default=argparse.SUPPRESS,
+                    help="required for production instances (reads only; "
+                         "guards still apply)")
     gp.add_argument("--user", default=argparse.SUPPRESS)
     gp.add_argument("--format", choices=["table", "csv", "json"],
                     default=argparse.SUPPRESS)
@@ -308,7 +312,7 @@ def main():
         args, "format", "table")
     cfg = ol.load_config(AREA)
     name, inst = ol.pick_instance(AREA, cfg, getattr(args, "instance", None))
-    ol.note_if_prod(name, inst)
+    ol.require_prod_flag(name, inst, args)
     ol.warn_http_creds(AREA, name, inst)
     engine = (inst.get("engine") or "").lower()
     if engine not in CLIENTS:
@@ -430,9 +434,6 @@ def _cmd_columns(call):
             % (schema.replace("'", "''"),
                args.table.replace("'", "''")))
     _print_sql(AREA, name, inst, engine, stmt, user, fmt)
-
-
-    ol.die("unknown subcommand '%s'" % args.cmd, ol.EX_USAGE)
 
 
 if __name__ == "__main__":

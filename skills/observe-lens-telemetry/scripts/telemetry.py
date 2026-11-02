@@ -569,6 +569,10 @@ def cmd_get(ctx, args):
 def build_parser():
     gp = argparse.ArgumentParser(add_help=False)
     gp.add_argument("--instance", default=argparse.SUPPRESS)
+    gp.add_argument("--prod", action="store_true",
+                    default=argparse.SUPPRESS,
+                    help="required for production instances (reads only; "
+                         "guards still apply)")
     gp.add_argument("--json", action="store_true", default=argparse.SUPPRESS)
     gp.add_argument("--ds", help="datasource uid override (grafana)",
                     default=argparse.SUPPRESS)
@@ -627,7 +631,7 @@ def main():
         ol.die("no subcommand; see --help", ol.EX_USAGE)
     cfg = ol.load_config(AREA)
     name, inst = ol.pick_instance(AREA, cfg, getattr(args, "instance", None))
-    ol.note_if_prod(name, inst)
+    ol.require_prod_flag(name, inst, args)
     ol.warn_http_creds(AREA, name, inst)
     if (inst.get("provider") or "").lower() not in REQUIRED:
         ol.die("unknown provider '%s' (grafana, prometheus, loki or tempo)"

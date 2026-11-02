@@ -393,6 +393,21 @@ class TestKubeRo(EnvGuard):
             self._assert_refused("flux", *a)
 
 
+class TestKubeProdFlag(EnvGuard):
+    def test_take_prod_flag(self):
+        import types
+        kr = helpers.kube_ro()
+        ns = types.SimpleNamespace(prod=False)
+        out = kr._take_prod_flag(ns, ["get", "pods", "--prod"])
+        assert ns.prod is True
+        assert out == ["get", "pods"]
+        # stripped args still go through decide() unchanged
+        ok, _ = kr.decide("kubectl",
+                          kr._take_prod_flag(ns, ["delete", "pod", "x",
+                                                  "--prod"]))
+        assert not ok
+
+
 class TestUrlParsers(EnvGuard):
     def test_jenkins_job_path(self):
         p = helpers.pipelines()
@@ -841,6 +856,39 @@ class TestTmpDirPerms(EnvGuard):
         finally:
             import shutil
             shutil.rmtree(base)
+
+
+class TestRequireProdFlag(EnvGuard):
+    def _args(self, prod=False):
+        import types
+        return types.SimpleNamespace(prod=prod)
+
+    def test_prod_without_flag_raises(self):
+        inst = {"environment": "prod"}
+        with pytest.raises(ol.OlError) as e:
+            ol.require_prod_flag("ci-main", inst, self._args())
+        assert e.value.code == 5
+        assert "ci-main" in str(e.value)
+        assert "--prod" in str(e.value)
+
+    def test_prod_with_flag_ok_and_notes(self, capsys):
+        assert ol.require_prod_flag("ci-main", {"environment": "prod"},
+                                    self._args(prod=True)) is None
+        assert "is production" in capsys.readouterr().err
+
+    def test_nonprod_silent(self, capsys):
+        for inst in ({"environment": "dev"}, {}):
+            for prod in (False, True):
+                assert ol.require_prod_flag(
+                    "x", inst, self._args(prod=prod)) is None
+        assert capsys.readouterr().err == ""
+
+    def test_confirm_overrides_environment(self):
+        assert ol.require_prod_flag("x", {"environment": "prod",
+                                          "confirm": False},
+                                    self._args()) is None
+        with pytest.raises(ol.OlError):
+            ol.require_prod_flag("x", {"confirm": True}, self._args())
 
 
 class TestPlainHttpWarning(EnvGuard):
